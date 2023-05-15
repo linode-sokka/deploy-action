@@ -1,0 +1,14 @@
+services:
+  whoami:
+    environment:
+      LETSENCRYPT_HOST: ""
+      VIRTUAL_HOST: whoami.alexrudy.test
+    ports:
+      - 8091:80
+    image: jwilder/whoami
+    networks:
+      reverse-proxy: null
+networks:
+  reverse-proxy:
+    name: reverse-proxy
+    external: true

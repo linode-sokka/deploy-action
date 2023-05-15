@@ -14,7 +14,10 @@ inputs:
     description: "Arguments to pass to docker compose"
     required: false
     default: ""
-
+  deploy:
+    description: "Should this actually deploy"
+    required: false
+    default: "true"
 outputs: {}
 runs:
   using: "node16"

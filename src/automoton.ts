@@ -8,7 +8,7 @@ export async function get_configuration(args: string[]): Promise<string> {
 
         let compose_configuration = '';
 
-        const options: ExecOptions = {};
+        const options: ExecOptions = { silent: true };
         options.listeners = {
             stdout: (data: Buffer) => {
                 compose_configuration += data.toString();
@@ -47,14 +47,9 @@ export async function upload_configuration(project: string, configuration: strin
 
 export async function push_images(args: string[]) {
     try {
-        const options: ExecOptions = {};
-        options.listeners = {
-            stdout: (data: Buffer) => {
-                core.info(data.toString());
-            },
-        };
-        await exec('docker', ['compose'].concat(args, ['build']), options);
-        await exec('docker', ['compose'].concat(args, ['push']), options);
+
+        await exec('docker', ['compose'].concat(args, ['build']));
+        await exec('docker', ['compose'].concat(args, ['push']));
 
     } catch (error) {
         if (error instanceof Error) core.setFailed(error.message);
