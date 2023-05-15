@@ -1,13 +1,21 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: "Automoton Deploy"
+description: "Deploy a docker compose project to Automoton on Linode"
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
+  project:
+    description: "name of the project at automtoton"
+    required: false
+  token:
+    description: "authentication token for automoton"
     required: true
-    default: '1000'
-outputs:
-  time: # output will be available to future steps
-    description: 'The current time after waiting'
+  url:
+    description: "Base url for automoton api"
+    required: true
+  compose:
+    description: "Arguments to pass to docker compose"
+    required: false
+    default: ""
+
+outputs: {}
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"
