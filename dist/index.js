@@ -39,7 +39,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.push_images = exports.upload_configuration = exports.get_configuration = void 0;
+exports.push_images = exports.upload_configuration = exports.getEndpoint = exports.get_configuration = void 0;
 const exec_1 = __nccwpck_require__(514);
 const core = __importStar(__nccwpck_require__(186));
 const auth = __importStar(__nccwpck_require__(526));
@@ -65,14 +65,21 @@ function get_configuration(args) {
     });
 }
 exports.get_configuration = get_configuration;
+function getEndpoint(project) {
+    var base = core.getInput('url');
+    if (base.endsWith('/')) {
+        base = base.slice(0, -1);
+    }
+    return `${base}/api/v1/project/${project}/configuration`;
+}
+exports.getEndpoint = getEndpoint;
 function upload_configuration(project, configuration) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const token = core.getInput('token');
-            const base = core.getInput('url');
-            const endpoint = `${base}/api/v1/project/${project}/configuration`;
+            const endpoint = getEndpoint(project);
             const bearer = new auth.BearerCredentialHandler(token);
-            const http = new httpm.HttpClient('http-client-tests', [
+            const http = new httpm.HttpClient('linode-sokka-github-actions-deploy', [
                 bearer
             ]);
             yield http.post(endpoint, configuration);

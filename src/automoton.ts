@@ -24,16 +24,24 @@ export async function get_configuration(args: string[]): Promise<string> {
     }
 }
 
+export function getEndpoint(project: string): string {
+    var base = core.getInput('url');
+
+    if (base.endsWith('/')) {
+        base = base.slice(0, -1);
+    }
+
+    return `${base}/api/v1/project/${project}/configuration`;
+}
+
 export async function upload_configuration(project: string, configuration: string) {
     try {
         const token = core.getInput('token');
-        const base = core.getInput('url');
-        const endpoint = `${base}/api/v1/project/${project}/configuration`;
-
+        const endpoint = getEndpoint(project);
         const bearer = new auth.BearerCredentialHandler(token);
 
 
-        const http: httpm.HttpClient = new httpm.HttpClient('http-client-tests', [
+        const http: httpm.HttpClient = new httpm.HttpClient('linode-sokka-github-actions-deploy', [
             bearer
         ])
 
