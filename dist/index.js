@@ -82,7 +82,14 @@ function upload_configuration(project, configuration) {
             const http = new httpm.HttpClient('linode-sokka-github-actions-deploy', [
                 bearer
             ]);
-            yield http.post(endpoint, configuration);
+            const response = yield http.post(endpoint, configuration);
+            if (response.message.statusCode !== 202) {
+                yield response.readBody().then((body) => {
+                    core.error(`Failed to upload configuration: ${response.message.statusMessage}` + body);
+                });
+                core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
+                throw new Error(`Failed to upload configuration: ${response.message.statusMessage}`);
+            }
         }
         catch (error) {
             if (error instanceof Error)
