@@ -35,30 +35,25 @@ export function getEndpoint(project: string): string {
 }
 
 export async function upload_configuration(project: string, configuration: string) {
-    try {
-        const token = core.getInput('token');
-        const endpoint = getEndpoint(project);
-        const bearer = new auth.BearerCredentialHandler(token);
+    const token = core.getInput('token');
+    const endpoint = getEndpoint(project);
+    const bearer = new auth.BearerCredentialHandler(token);
 
 
-        const http: httpm.HttpClient = new httpm.HttpClient('linode-sokka-github-actions-deploy', [
-            bearer
-        ])
+    const http: httpm.HttpClient = new httpm.HttpClient('linode-sokka-github-actions-deploy', [
+        bearer
+    ])
 
-        const response = await http.post(endpoint, configuration);
+    const response = await http.post(endpoint, configuration);
 
-        if (response.message.statusCode !== 202) {
-            await response.readBody().then((body) => {
-                core.error(`Failed to upload configuration: ${response.message.statusMessage}` + body)
-            });
-            core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
-            throw new Error(`Failed to upload configuration: ${response.message.statusMessage}`);
-        }
-
-    } catch (error) {
-        if (error instanceof Error) core.setFailed(error.message);
-        throw error;
+    if ((response.message.statusCode !== 202) && (response.message.statusCode !== 200)) {
+        await response.readBody().then((body) => {
+            core.error(`Failed to upload configuration: ${response.message.statusMessage}` + body)
+        });
+        core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
     }
+
+
 }
 
 export async function push_images(args: string[]) {

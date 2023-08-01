@@ -75,26 +75,18 @@ function getEndpoint(project) {
 exports.getEndpoint = getEndpoint;
 function upload_configuration(project, configuration) {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const token = core.getInput('token');
-            const endpoint = getEndpoint(project);
-            const bearer = new auth.BearerCredentialHandler(token);
-            const http = new httpm.HttpClient('linode-sokka-github-actions-deploy', [
-                bearer
-            ]);
-            const response = yield http.post(endpoint, configuration);
-            if (response.message.statusCode !== 202) {
-                yield response.readBody().then((body) => {
-                    core.error(`Failed to upload configuration: ${response.message.statusMessage}` + body);
-                });
-                core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
-                throw new Error(`Failed to upload configuration: ${response.message.statusMessage}`);
-            }
-        }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
-            throw error;
+        const token = core.getInput('token');
+        const endpoint = getEndpoint(project);
+        const bearer = new auth.BearerCredentialHandler(token);
+        const http = new httpm.HttpClient('linode-sokka-github-actions-deploy', [
+            bearer
+        ]);
+        const response = yield http.post(endpoint, configuration);
+        if ((response.message.statusCode !== 202) && (response.message.statusCode !== 200)) {
+            yield response.readBody().then((body) => {
+                core.error(`Failed to upload configuration: ${response.message.statusMessage}` + body);
+            });
+            core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
         }
     });
 }
@@ -163,18 +155,12 @@ function parseArgs(args) {
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const args = parseArgs(core.getInput('compose'));
-            yield (0, automoton_1.push_images)(args);
-            const configuration = yield (0, automoton_1.get_configuration)(args);
-            const project = get_project_name();
-            if (core.getInput('deploy') == 'true') {
-                yield (0, automoton_1.upload_configuration)(project, configuration);
-            }
-        }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
+        const args = parseArgs(core.getInput('compose'));
+        yield (0, automoton_1.push_images)(args);
+        const configuration = yield (0, automoton_1.get_configuration)(args);
+        const project = get_project_name();
+        if (core.getInput('deploy') == 'true') {
+            yield (0, automoton_1.upload_configuration)(project, configuration);
         }
     });
 }

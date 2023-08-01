@@ -7,17 +7,14 @@ function parseArgs(args: string): string[] {
 }
 
 async function run(): Promise<void> {
-    try {
-        const args = parseArgs(core.getInput('compose'))
-        await push_images(args);
-        const configuration = await get_configuration(args);
-        const project = get_project_name();
-        if (core.getInput('deploy') == 'true') {
-            await upload_configuration(project, configuration);
-        }
-    } catch (error) {
-        if (error instanceof Error) core.setFailed(error.message)
+    const args = parseArgs(core.getInput('compose'))
+    await push_images(args);
+    const configuration = await get_configuration(args);
+    const project = get_project_name();
+    if (core.getInput('deploy') == 'true') {
+        await upload_configuration(project, configuration);
     }
+
 }
 
 function get_project_name(): string {
