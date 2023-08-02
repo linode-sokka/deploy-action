@@ -39,12 +39,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.push_images = exports.upload_configuration = exports.getEndpoint = exports.get_configuration = void 0;
+exports.upload_configuration = exports.getEndpoint = exports.get_configuration = void 0;
 const exec_1 = __nccwpck_require__(514);
 const core = __importStar(__nccwpck_require__(186));
 const auth = __importStar(__nccwpck_require__(526));
 const httpm = __importStar(__nccwpck_require__(255));
-function get_configuration(args) {
+function get_configuration(args, name) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let compose_configuration = '';
@@ -54,7 +54,7 @@ function get_configuration(args) {
                     compose_configuration += data.toString();
                 },
             };
-            yield (0, exec_1.exec)('docker', ['compose'].concat(args, ['config']), options);
+            yield (0, exec_1.exec)('docker', ['compose', '-p', name].concat(args, ['config']), options);
             return compose_configuration;
         }
         catch (error) {
@@ -74,6 +74,7 @@ function getEndpoint(project) {
 }
 exports.getEndpoint = getEndpoint;
 function upload_configuration(project, configuration) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const token = core.getInput('token');
         const endpoint = getEndpoint(project);
@@ -82,29 +83,13 @@ function upload_configuration(project, configuration) {
             bearer
         ]);
         const response = yield http.post(endpoint, configuration);
-        if ((response.message.statusCode !== 202) && (response.message.statusCode !== 200)) {
-            yield response.readBody().then((body) => {
-                core.error(`Failed to upload configuration: ${response.message.statusMessage}` + body);
-            });
+        let statusCode = (_a = response.message.statusCode) !== null && _a !== void 0 ? _a : 0;
+        if (statusCode >= 200 && statusCode < 300) {
             core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
         }
     });
 }
 exports.upload_configuration = upload_configuration;
-function push_images(args) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield (0, exec_1.exec)('docker', ['compose'].concat(args, ['build']));
-            yield (0, exec_1.exec)('docker', ['compose'].concat(args, ['push']));
-        }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(error.message);
-            throw error;
-        }
-    });
-}
-exports.push_images = push_images;
 
 
 /***/ }),
@@ -156,9 +141,8 @@ function parseArgs(args) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const args = parseArgs(core.getInput('compose'));
-        yield (0, automoton_1.push_images)(args);
-        const configuration = yield (0, automoton_1.get_configuration)(args);
         const project = get_project_name();
+        const configuration = yield (0, automoton_1.get_configuration)(args, project);
         if (core.getInput('deploy') == 'true') {
             yield (0, automoton_1.upload_configuration)(project, configuration);
         }

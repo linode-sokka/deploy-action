@@ -3,7 +3,7 @@ import * as core from '@actions/core';
 import * as auth from '@actions/http-client/lib/auth';
 import * as httpm from '@actions/http-client';
 
-export async function get_configuration(args: string[]): Promise<string> {
+export async function get_configuration(args: string[], name: string): Promise<string> {
     try {
 
         let compose_configuration = '';
@@ -15,7 +15,7 @@ export async function get_configuration(args: string[]): Promise<string> {
             },
         };
 
-        await exec('docker', ['compose'].concat(args, ['config']), options);
+        await exec('docker', ['compose', '-p', name].concat(args, ['config']), options);
 
         return compose_configuration;
     } catch (error) {
@@ -45,25 +45,12 @@ export async function upload_configuration(project: string, configuration: strin
     ])
 
     const response = await http.post(endpoint, configuration);
+    let statusCode = response.message.statusCode ?? 0;
 
-    if ((response.message.statusCode !== 202) && (response.message.statusCode !== 200)) {
-        await response.readBody().then((body) => {
-            core.error(`Failed to upload configuration: ${response.message.statusMessage}` + body)
-        });
+    if (statusCode >= 200 && statusCode < 300) {
         core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
     }
 
 
 }
 
-export async function push_images(args: string[]) {
-    try {
-
-        await exec('docker', ['compose'].concat(args, ['build']));
-        await exec('docker', ['compose'].concat(args, ['push']));
-
-    } catch (error) {
-        if (error instanceof Error) core.setFailed(error.message);
-        throw error;
-    }
-}
