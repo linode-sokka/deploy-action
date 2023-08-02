@@ -47,7 +47,7 @@ export async function upload_configuration(project: string, configuration: strin
     const response = await http.post(endpoint, configuration);
     let statusCode = response.message.statusCode ?? 0;
 
-    if (statusCode >= 200 && statusCode < 300) {
+    if (!(statusCode >= 200 && statusCode < 300)) {
         core.setFailed(`Failed to upload configuration: ${response.message.statusMessage}`);
     }
 
