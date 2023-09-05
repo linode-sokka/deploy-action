@@ -15,7 +15,7 @@ export async function get_configuration(args: string[], name: string): Promise<s
             },
         };
 
-        await exec('docker', ['compose', '-p', name].concat(args, ['config']), options);
+        await exec('docker', ['compose', '--project-name', name].concat(args, ['config', '--no-path-resolution']), options);
 
         return compose_configuration;
     } catch (error) {
