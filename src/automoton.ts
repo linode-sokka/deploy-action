@@ -15,7 +15,13 @@ export async function get_configuration(args: string[], name: string): Promise<s
             },
         };
 
-        await exec('docker', ['compose', '--project-name', name].concat(args, ['config', '--no-path-resolution']), options);
+        try {
+            await exec('docker', ['compose', '-p', name].concat(args, ['config']), options);
+
+        } catch (error) {
+            core.error(`Compose Configuration Failure: ${compose_configuration}`)
+            throw error;
+        }
 
         return compose_configuration;
     } catch (error) {
